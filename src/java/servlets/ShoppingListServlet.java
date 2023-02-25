@@ -20,17 +20,20 @@ public class ShoppingListServlet extends HttpServlet {
         if (session.getAttribute("username") != null) {
             if (action != null) {
                 if (action.equals("logout")) {
+                    request.setAttribute("message", "Successfully logged out.");
                     getServletContext().getRequestDispatcher("/WEB-INF/register.jsp").forward(request, response);
                     return;
                 }
             }
             
             ArrayList<String> arr = (ArrayList<String>) session.getAttribute("list");
-            String itemList = "";
-            for (String item : arr) {
-                itemList += "<li><input type='radio' name='item' value='apples'>" + item + "</li>";
+            if (arr != null) {
+                String itemList = "";
+                for (String item : arr) {
+                    itemList += "<li><input type='radio' name='item' value='apples'>" + item + "</li>";
+                }
+                session.setAttribute("itemList", itemList);
             }
-            session.setAttribute("itemList", itemList);
             
             getServletContext().getRequestDispatcher("/WEB-INF/shoppingList.jsp").forward(request, response);
         } else {
@@ -59,23 +62,62 @@ public class ShoppingListServlet extends HttpServlet {
         }
         
         if (action.equals("add")) {
+            // Initialize variables
             String item = request.getParameter("item");
-            if (item != null && !item.equals("")) {
-                ArrayList<String> arr = (ArrayList<String>) session.getAttribute("list");
-                String itemList = "";
+            ArrayList<String> arr = (ArrayList<String>) session.getAttribute("list");
+            String itemList = "";
             
-                for (String i : arr) {
-                    itemList += "<li><input type='radio' name='item' value='apples'>" + i + "</li>";
-                }
-                session.setAttribute("itemList", itemList);
+            // Check if shopping list is empty
+            if (arr == null) {
+                arr = new ArrayList<>();
             }
+            
+            // Add item to shopping list
+            if (item != null && !item.equals("")) {
+                arr.add(item);
+            }
+            
+            // Create unordered list
+            for (String i : arr) {
+                itemList += "<li><input type='radio' name='item' value='" + i + "'>" + i + "</li>";
+            }
+            
+            // Update attributes
+            request.setAttribute("itemList", itemList);
+            session.setAttribute("list", arr);
             
             getServletContext().getRequestDispatcher("/WEB-INF/shoppingList.jsp").forward(request, response);
             return;
         }
         
         if (action.equals("delete")) {
-                
+            // Initialize variables
+            String item = request.getParameter("item");
+            ArrayList<String> arr = (ArrayList<String>) session.getAttribute("list");
+            String itemList = "";
+            
+            // Check if shopping list is empty
+            if (arr == null) {
+                getServletContext().getRequestDispatcher("/WEB-INF/shoppingList.jsp").forward(request, response);
+                return;
+            }
+            
+            // Remove item from shopping list
+            if (item != null && !item.equals("")) {
+                arr.remove(item);
+            }
+            
+            // Create unordered list
+            for (String i : arr) {
+                itemList += "<li><input type='radio' name='item' value='" + i + "'>" + i + "</li>";
+            }
+            
+            // Update attributes
+            request.setAttribute("itemList", itemList);
+            session.setAttribute("list", arr);
+            
+            getServletContext().getRequestDispatcher("/WEB-INF/shoppingList.jsp").forward(request, response);
+            return;
         }
         
         if (action.equals("logout")) {
